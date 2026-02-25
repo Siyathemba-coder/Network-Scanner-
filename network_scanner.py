@@ -15,7 +15,7 @@ def ping_host(ip):
             stderr=subprocess.DEVNULL
         )
         return result.returncode == 0
-    except:
+    except Exception:
         return False
 
 def scan_port(ip, port):
@@ -25,7 +25,7 @@ def scan_port(ip, port):
         result = sock.connect_ex((str(ip), port))
         sock.close()
         return result == 0
-    except:
+    except Exception:
         return False
 
 def port_scan_worker(ip, ports, open_ports_list):
