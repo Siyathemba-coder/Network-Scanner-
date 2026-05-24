@@ -32,11 +32,12 @@ def scan_port(ip, port):
     except:
         return False
 
-def port_scan_worker(ip, ports, open_ports_list):
+def port_scan_worker(ip, ports, open_ports_list, lock):
     while not ports.empty():
         port = ports.get()
         if scan_port(ip, port):
-            open_ports_list.append(port)
+            with lock:
+                open_ports_list.append(port)
         ports.task_done()
 
 def scan_active_hosts(network):
@@ -56,12 +57,13 @@ def scan_ports_for_host(ip, start_port, end_port):
     print("----------------------------------")
     port_queue = Queue()
     open_ports = []
+    lock = threading.Lock()
 
     for port in range(start_port, end_port + 1):
         port_queue.put(port)
 
     for _ in range(50):
-        t = threading.Thread(target=port_scan_worker, args=(ip, port_queue, open_ports))
+        t = threading.Thread(target=port_scan_worker, args=(ip, port_queue, open_ports, lock))
         t.daemon = True
         t.start()
 
